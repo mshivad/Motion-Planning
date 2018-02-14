@@ -1,0 +1,40 @@
+*********************************************************************************************************
+In order to run the program upload all the files in the new project.
+and run 'run_prgm.py'
+*********************************************************************************************************
+In order to choose environment
+Go to 'run_prgm.py'  and change to the respective 'test_rrt_env' function and comment out the rest.
+
+*********************************************************************************************************
+In order to choose RRT/RRT_Connect/RRT_Bi-directional
+Go to 'run_prgm.py'  and change 'test_rrt_env' function argument 'connect' either to False/1/2
+
+False indicates RRT
+1(one)  indicates RRT_Connect
+2 (two) indicates RRT_Bi-direction
+
+
+*********************************************************************************************************
+In order to change probability of random generated sample towards goal
+Go to 'rrt.py' ----> 'test_rrt_env' function ---->
+
+    rrt = RRT(num_samples,
+              dims,
+              step_length,
+              lims = pe.lims,
+              connect_prob = 0.05,
+              collision_func=pe.test_collisions)
+
+change 'connect_prob' argument to desired probability.
+**********************************************************************************************************
+
+Change rrt to prm in run.prgm file to run prm
+
+*********************************************************************************************************
+In order to choose PRM/Gaussian/PRM-RRT
+Go to 'run_prgm.py'  and change 'test_rrt_env' function argument
+Gaussian = False and rrtlp = False for PRM
+Gaussian=True and rrtlp = False for gaussian PRM
+and Gaussian =True/false and rrtlp = True for RRT-PRM
+
+
