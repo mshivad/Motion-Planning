@@ -1,0 +1,146 @@
+% Created 2015-08-28 Fri 12:43
+\documentclass[11pt]{hermans-hw}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{latexsym}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb} % For set naming (i.e. R^n)
+\usepackage{subfig}
+\usepackage{url}
+
+\duedate{Due: 11 September 2016 by 11:55pm}
+\class{CS 6370 / ME EN 6225 Motion Planning}
+\institute{University of Utah}
+\title{Project 1: Graph Search}
+\begin{document}
+\maketitle
+\vspace{-30pt}
+\section*{Instructions}
+All solutions should be uploaded via the assignment on Canvas.
+
+\textbf{Naming:} Your upload should be named in the format \emph{<uid>}.zip where \emph{<uid>} is your Utah uid. The first level of the zip should contain a single root folder with your uid as the name \emph{<uid>}.
+
+\textbf{Code Organization:} You should have a text file called README.txt in the root directory of your submitted archive which explains how to run the code submitted. All necessary files, like map or environment files should be included in your submission.
+
+\textbf{Written Answers:} Place all written answers  to questions as well as any images or other output data used to explain your responses in a single PDF document. This should be clearly named Proj\emph{<number>}-answers.pdf, where number is the Project number (i.e. 1 for this assignment). Please make sure to write your name at the top of the document!
+
+\section*{Forward Graph Search (125 total points)}
+The lectures so far have focused on performing search on grids and graph representations. This project will focus on implementing and analyzing some of the algorithms we've discussed.
+
+To help you with getting started there is an included python file \texttt{graph\_serach.py} which has some classes defined to help you focus on the algorithm implementation. There is an additional file named \texttt{PythonPointers.pdf} on Canvas which gives some links and simple examples to help people who are new to python. The code also contains function headers for the search methods you need to implement. Feel free to change the function arguments necessary to make it easier for you to solve the problems.
+
+In addition to the code file included there are a few text files with included maps which we will use for evaluating our algorithms. If you write you own code you'll need to have it read this kind of file so that it can be evaluated on new maps once you've submitted it for grading. The map is defined as follows:
+\begin{description}
+\item[0] - denotes clear cell
+\item[x] - denotes obstacle
+\item[g] - denotes goal location (clear)
+\item[i] - denotes init location (clear)
+\end{description}
+
+For now the robot has actions \(A = \{\texttt{left}, \texttt{right}, \texttt{up}, \texttt{down}\}\). The robot can move to a free cell, but if the action attempts to move to an occupied cell or off the map the action is not valid and the robot remains in the same state.
+
+\section{Depth First Search (40 pts)}
+We will start by implementing depth first search. I'll walk you through this one.
+\begin{description}
+\item[Implement DFS] You may find the Python \texttt{list} class helpful. For a list instance \texttt{l = []} you can push to the end of the list by performing \texttt{l.append(n)} and pop from the end using the function call \texttt{x = l.pop()}
+
+The provided class \texttt{GridMap} reads in a map file and sets up a transition function for the grid world. It also provides methods for testing if the goal location has been reached. I've provided psuedocode for a version of depth first search below:
+
+\begin{verbatim}
+def DFS(init_state, f, is_goal, actions):
+    frontier = [] # Search stack
+    n0 = SearchNode(init_state, actions)
+    visited = []
+    frontier.push(n0)
+    while len(frontier) > 0:
+        # Peak last element
+        n_i = frontier.pop()
+        if n_i not in visited:
+            visited.add(n_i.state)
+            if is_goal(n_i.state):
+                return (path(n_i), visited)
+            else:
+                for a in actions:
+                    s_prime = f(n_i.state, a)
+                    n_prime = SearchNode(s_prime, actions, n_i, a)
+                    frontier.push(n_prime)
+    return None
+
+\end{verbatim}
+
+I should be able to run your code using a map file as described above and it should be clear how to change the transition function and actions used.
+
+\item[1.1] (10 pts) Run DFS on \texttt{map0.txt}. Report the path and set of states visited. Include an image of the path taken in your answer.
+Is the path found the shortest path? Explain why the algorithm did or did not find the shortest path.
+\item[1.2] (5 pts) Perform the same test and analysis for \texttt{map1.txt}.
+\item[1.3] (5 pts) Perform the same test and analysis for \texttt{map2.txt}.
+\item[1.4] (4 pts) The DFS algorithm explained in the psuedocode above adds search nodes for all actions from a given node at once. What issues may arise from doing this? How could this be alleviated?
+\item[1.5] (6 pts) Reverse the order of the actions explored by DFS and run it again on  \texttt{map0.txt} and \texttt{map1.txt}. Does anything change in your results? What? Why is this the case?
+\item[1.6] (10 pts) Extend DFS to iterative deepening DFS. You need to add an argument to your DFS function that it only explores to a maximum depth \(m\) during execution. Additionally, you need to modify your visited set to take into account the depth at which nodes are visited, since they may be revisited at a shallower path which leads to the goal in fewer than \(m\) steps.
+
+Run your iterative deepening implementation on \texttt{map0.txt} and \texttt{map1.txt}. Did your algorithm find the shortest path? Explain why it did or did not. 
+
+\end{description}
+
+\section{Breadth First Search (25 pts)}
+\begin{description}
+\item[Implement BFS] Now implement breadth first search. Remember we want to use a queue as our frontier data structure. In Python we can implement this by again using the \texttt{list} data structure. For a given list \texttt{l = []} we can push to the end of the queue using \texttt{l.append(n)} and pop from the front using \texttt{n = l.pop(0)}. Note the parameter 0 provided to pop, this tells the list to pop element 0 from the list (the front). You could pop the second element using \texttt{l.pop(1)} or explicitly from the rear of the list by using \texttt{l.pop(-1)}
+\item[2.1] (5 pts) Run BFS on \texttt{map0.txt}. Report the path and set of states visited.
+Is the path found the shortest path? Explain why the algorithm did or did not find the shortest path.
+\item[2.2] (5 pts) Perform the same test and analysis for \texttt{map1.txt}.
+\item[2.3] (5 pts) Perform the same test and analysis for \texttt{map2.txt}.
+\item[2.4] (10 pts) Compare the performance of your algorithm to DFS and iterative deepening DFS above. How do the paths found differ? How do the states visited differ? Which was easier to implement and why? Discuss anything else you found interesting or difficult in implementing and evaluating the three algorithms.
+\end{description}
+\section*{Searching with Costs}
+We will now switch to examining algorithms for planning with costs associated to actions.
+To begin with all actions will have the same cost of 1. We will change this below.
+\section{Uniform Cost Search (20 pts)}
+\begin{description}
+\item[Implement Uniform Cost Search] Remember that for implementing uniform cost search you need a priority queue to access the lowest cost path currently in the frontier. I have provided the python class \texttt{PriorityQ}. This function is setup to work with the \texttt{SearchNode} class and I have not used it with other classes. The class has the functions \texttt{push()}, \texttt{pop()}, and \texttt{peak()}, which respectively allow you to add an element with an associated cost to the queue, remove the lowest cost element, and see what the lowest cost element is. There is also a replace function for updating an element with the same state as the element added, however you can also access this function by calling \texttt{push()} with a SearchNode that has a state already in the queue.
+
+You can also get the length of a \texttt{PriorityQ} instance \(q\) using \(len(q)\) or test if a state \(s\) is in the priority queue by using \(s in q\) which will return True if the state \(s\) is currently in the queue.
+
+\item[3.1] (5 pts) Run uniform cost search on \texttt{map0.txt}. Report the path and set of states visited. Is the path found the lowest cost path?
+Is the path found the shortest path? Explain why the algorithm did or did not find the lowest cost path.
+\item[3.2] (5 pts) Perform the same test and analysis for \texttt{map1.txt}.
+\item[3.3] (10 pts) Now extend the set of actions to allow the robot to move diagonally on the grid. Make diagonal action cost 1.5 as opposed to 1 for lateral and vertical moves. Perform the same test and analysis for \texttt{map0.txt}, \texttt{map1.txt}, and \texttt{map2.txt} as in 3.1.
+
+\end{description}
+
+\section{A* Search (35 pts)}
+\begin{description}
+\item[Implement A*] You now need to implement A* search by incorporating heuristics. You should make it easy to swap out heuristic functions as we will be evaluating a few below.
+
+\item[4.1] (10 pts) Implement a euclidean distance heuristic for evaluating A*. Run your algorithm on maps \texttt{map0.txt}, \texttt{map1.txt}, and \texttt{map2.txt} and give the results. How does the path you get compare to uniform cost search? How do the states explored compare to uniform cost search? Did you notice any other differences in comparing the two?
+
+\item[4.2] (10 pts) Now implement a Manhattan distance heuristic. Run it on the same three maps and perform the same analysis.
+
+\item[4.3] (10 pts) Now extend the set of actions to allow the robot to move diagonally on the grid. Make diagonal action cost 1.5 as opposed to 1 for lateral and vertical moves. Run the same tests and analysis from 4.1 and 4.2 using both heuristics. Are these heuristics still admissable for our new problem? Why or why not? What is the effect of the new actions being added compared to the previous problems? What is the effect of the heuristic being admissable or not on the solutions your implementation gives? 
+
+\item[4.4] (5 pts) Run Uniform Cost Search with diagonal actions described in 4.3. Compare the Uniform Cost Search and A* with diagonal actions. 
+
+
+\end{description}
+
+\section{Self Analysis (5 pts)}
+\begin{description}
+\item[5.1] (1 pt) What was the hardest part of the assignment for you?
+\item[5.2] (1 pt) What was the easiest part of the assignment for you?
+\item[5.3] (1 pt) What problem(s) helped further your understanding of the course material?
+\item[5.4] (1 pt) Did you feel any problems were tedious and not helpful to your understanding of the material?
+\item[5.5] (1 pt) What other feedback do you have about this homework?
+\end{description}
+
+\end{document}
